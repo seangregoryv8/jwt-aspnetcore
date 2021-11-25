@@ -6,7 +6,7 @@ namespace JWTASPNetCore
 {
     public class UserRepository : IUserRepository
     {
-        private readonly List<UserDTO> users = new List<UserDTO>();
+        private readonly List<UserDTO> users = new();
         public UserRepository()
         {
             users.Add(new UserDTO { UserName = "joydipkanjilal", Password = "joydip123", Role = "manager" });
