@@ -22,15 +22,17 @@ namespace JWTASPNetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSession();
-            services.AddControllersWithViews();
-            services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<ITokenService, TokenService>();
+            services.AddSession().AddControllersWithViews();
+            services
+                .AddTransient<IUserRepository, UserRepository>()
+                .AddTransient<ITokenService, TokenService>()
+                .AddScoped<ITokenService, TokenService>()
+                .AddScoped<IUserRepository, UserRepository>();
 
             services.AddAuthentication(auth =>
             {
                 auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                //auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultForbidScheme = JwtBearerDefaults.AuthenticationScheme;
             })
             .AddJwtBearer(options =>
             {
@@ -51,13 +53,9 @@ namespace JWTASPNetCore
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseExceptionHandler("/Home/Error");
-            }
 
             app.UseSession();
 
@@ -69,14 +67,12 @@ namespace JWTASPNetCore
                     context.Request.Headers.Add("Authorization", "Bearer " + token);
                 }
                 await next();
-            });
-
-            app.UseStaticFiles();
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+            })
+            .UseStaticFiles()
+            .UseRouting()
+            .UseAuthentication()
+            .UseAuthorization()
+            .UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
